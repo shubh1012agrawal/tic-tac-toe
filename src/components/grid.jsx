@@ -20,6 +20,7 @@ class Grid extends Component {
         winner:'-',
         winX:0,
         winO:0,
+        doneSquares:[],
     }
 
     styleImg1 = {
@@ -60,14 +61,14 @@ class Grid extends Component {
 
     getWinner(){
         const sq=this.state.squares;
-        if( (sq[0].value===sq[1].value) && (sq[2].value===sq[1].value) && (sq[0].value!='')) return sq[0].value;
-        if( (sq[3].value===sq[4].value) && (sq[5].value===sq[4].value) && (sq[3].value!='')) return sq[3].value;
-        if( (sq[6].value===sq[7].value) && (sq[8].value===sq[7].value) && (sq[6].value!='')) return sq[6].value;
-        if( (sq[0].value===sq[3].value) && (sq[6].value===sq[3].value) && (sq[0].value!='')) return sq[0].value;
-        if( (sq[1].value===sq[4].value) && (sq[7].value===sq[1].value) && (sq[1].value!='')) return sq[1].value;
-        if( (sq[8].value===sq[2].value) && (sq[5].value===sq[2].value) && (sq[2].value!='')) return sq[2].value;
-        if( (sq[0].value===sq[4].value) && (sq[4].value===sq[8].value) && (sq[0].value!='')) return sq[0].value;
-        if( (sq[2].value===sq[4].value) && (sq[2].value===sq[6].value) && (sq[2].value!='')) return sq[2].value;
+        if( (sq[0].value===sq[1].value) && (sq[2].value===sq[1].value) && (sq[0].value!=='')) return sq[0].value;
+        if( (sq[3].value===sq[4].value) && (sq[5].value===sq[4].value) && (sq[3].value!=='')) return sq[3].value;
+        if( (sq[6].value===sq[7].value) && (sq[8].value===sq[7].value) && (sq[6].value!=='')) return sq[6].value;
+        if( (sq[0].value===sq[3].value) && (sq[6].value===sq[3].value) && (sq[0].value!=='')) return sq[0].value;
+        if( (sq[1].value===sq[4].value) && (sq[7].value===sq[1].value) && (sq[1].value!=='')) return sq[1].value;
+        if( (sq[8].value===sq[2].value) && (sq[5].value===sq[2].value) && (sq[2].value!=='')) return sq[2].value;
+        if( (sq[0].value===sq[4].value) && (sq[4].value===sq[8].value) && (sq[0].value!=='')) return sq[0].value;
+        if( (sq[2].value===sq[4].value) && (sq[2].value===sq[6].value) && (sq[2].value!=='')) return sq[2].value;
         
         return this.state.winner;
     };
@@ -93,6 +94,8 @@ class Grid extends Component {
             }
             return sq;
         })
+        let doneSquares = this.state.doneSquares;
+        if(z === 1) doneSquares.push(squareID)
         let winner;
         if(this.state.turn===9) winner='Draw'; 
         
@@ -106,7 +109,7 @@ class Grid extends Component {
             else if(winner==='O') winO+=1; 
         } 
         
-        this.setState({squares , turn:this.state.turn+z,winner,winO,winX });
+        this.setState({squares , turn:this.state.turn+z,winner,winO,winX,doneSquares });
         
         console.log('square with id' ,squareID , "clicked");
     }
@@ -128,6 +131,27 @@ class Grid extends Component {
         this.setState({winX:0, winO:0})
     }
 
+    handleUndo = () => {
+        if(this.state.turn >1)
+        {
+            let doneSquares = this.state.doneSquares;
+            let squareID = doneSquares.pop();
+            const squares = this.state.squares.map(sq=>{                
+                if(sq.id === squareID)
+                {
+                    sq.value='';
+                }
+                return sq;
+            })
+            let winX = this.state.winX;
+            let winO = this.state.winO;
+            if(this.state.winner === 'X' ) winX-=1;
+            if(this.state.winner === 'O' ) winO-=1;
+            this.setState({turn:this.state.turn-1,squares,doneSquares,winner:'-'
+                ,winX,winO
+            });  
+        }
+    }
     render() { 
         return (  
             <React.Fragment>
@@ -136,6 +160,8 @@ class Grid extends Component {
             <h1 style = {this.styleHeadingText} > Jai Ganesh Deva</h1>
             <button style={this.styleResetButton} onClick={this.handleRestart}> Restart </button>
             <button style={this.styleResetButton} onClick={this.handleReset}> Reset </button>
+            <button style={this.styleResetButton} onClick={this.handleUndo}> Undo </button>
+            
             <h3 style={this.styleTurn}>  Winner : {this.state.winner} </h3>
             
             <h3 style={this.styleTurn}> Player's Turn : {this.getTurn()} </h3>
